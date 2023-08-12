@@ -1,16 +1,35 @@
-.gab-answer {
+.notAlreadySpoken {
+    color: transparent;
     display: flex;
     justify-content: center;
-    
+    gap: 1rem;
 }
 
-.answer-word {
-    min-width: 3rem;
-    margin-left: 0.5rem;
-    border-bottom: 2px solid black;
-}
-
-.word {
-    display: inline-block;
+.alreadySpoken {
     color: green;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.gab__answer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border: 2px solid red;
+}
+
+.answer-word__span {
+    border-bottom: 2px solid red;
+    min-width: 4rem;
+    display: flex;
+    justify-content: center;
+}
+
+.current__gab {
+    border: 2px solid blue;
+    text-align: center;
+    margin: 0 auto;
 }

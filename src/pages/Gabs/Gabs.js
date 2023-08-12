@@ -2,92 +2,96 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import Button from '../../components/Button/Button';
 import "./Gabs.scss";
 
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import Loading from '../../components/Loading/Loading';
-import Keyword from '../../components/Keyword/Keyword';
+// import Keyword from '../../components/Keyword/Keyword';
 
 
 const Gabs = () => {
-    const [gabsArray, setGabsArray] = useState([]);
-    const [currentGab, setCurrentGab] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    // setTimeout(console.log(transcript), 500)
-
-    const { level } = useParams();
-    
-
+  
   const {
     transcript,
-    // listening,
+    listening,
     resetTranscript,
     browserSupportsSpeechRecognition
   } = useSpeechRecognition();
 
-  const []
+  const [gabsArray, setGabsArray] = useState([]);
+  const [currentGab, setCurrentGab] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [transcriptArr, setTranscriptArr] = useState([transcript.split(" ")]);
+  let currentGabAnswer =[];
+
+  const { level } = useParams();
+
   const handleStartListening = () => {
     SpeechRecognition.startListening({ continuous: true });
-    console.log("listening");
-    
-
+    console.log("start listening");
   }
 
   const handleStopListening = () => {
     SpeechRecognition.stopListening();
     console.log("stop listening");
   }
-  console.log(transcript)
-  function getRandomNumber() { return Math.floor(Math.random() * 10) + 1; }
 
   useEffect(() => {
     axios
-        .get(`http://localhost:8080/${level}`)
-        .then((res) => {
-            let data = res.data;
-            // console.log(data)
-            setGabsArray(data);
-            let randomIndex =getRandomNumber();
-            setCurrentGab(data[randomIndex]);
-            
-            setTimeout(() => setIsLoading(false), 500);
+      .get(`http://localhost:8080/${level}`)
+      .then((res) => {
+          let data = res.data;
+          setGabsArray(data);
+          let randomIndex = Math.floor(Math.random() * data.length);
+          setCurrentGab(data[randomIndex]); 
+          setTimeout(() => setIsLoading(false), 250);
         })
-        console.log(gabsArray)
-        console.log(currentGab)
-  },[]);
-  
-// console.log(randomIndex);
-  
+      }, []);
+    
 
-// start listening
-// SpeechRecognition.startListening()
-
-
-// stop listening
-// SpeechRecognition.stopListening()
-
-
-if (isLoading) {
-    return <Loading />
-  }
   if (!browserSupportsSpeechRecognition) {
-    return <span>Browser doesn't support speech recognition.</span>;
+    return <span>Sorry, this browser doesn't support speech recognition.</span>;
   }
-    return (
-        <div>
-            {transcript}
-           <h2>{currentGab ? currentGab[0][0] : ""}</h2>
-           <div className='gab-answer'>
-           {currentGab &&
-            currentGab[1].map((word, i) => {
-                return(<Keyword word={word} trasncript={transcript}/>)
-           
-           })}
-           </div>
-           <Button text={"Start Listening"} onClick={handleStartListening}/>
-           <Button text={"Stop Listening"} onClick={handleStopListening} />
-        </div>
-    );
-};
+      
+    if (isLoading) {
+    return <Loading />
+  } 
+
+  currentGabAnswer = [...currentGab[1]]
+
+console.log(transcript)
+  return (
+          <div>
+            {/* {transcript} */}
+            <h2 className="current__gab">{currentGab[0]}</h2>
+
+            <div className="gab__answer">
+              {currentGab &&
+                
+                currentGabAnswer.map((word, i) => {
+                  const alreadySpoken = [...new Set(transcript.split(" "))];
+                  const isTranscriptWord = alreadySpoken.includes(word);
+
+                  return isTranscriptWord 
+                  ? 
+                    <span className="answer-word__span" key={i}>
+                      <p className="alreadySpoken" key={i}>
+                        {word.slice(0, 1).toUpperCase() + word.slice(1)}
+                      </p>
+                    </span>
+                  :
+                    <span className="answer-word__span" key={i}>
+                      <p className="notAlreadySpoken" key={i}>
+                        {word}
+                      </p>
+                    </span>
+                  })}
+            </div>
+
+            <Button text={"Start Listening"} onClick={handleStartListening}/>
+            <Button text={"Stop Listening"} onClick={handleStopListening} />
+
+          </div>
+    )};
 
 export default Gabs;
